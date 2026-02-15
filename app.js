@@ -6,7 +6,8 @@ let currentPage = 1;
 const ITEMS_PER_PAGE = 24;
 
 const recipeList = document.getElementById("recipeList");
-const tagFilter = document.getElementById("tagFilter");
+const tagMenu = document.getElementById("tagMenu"); // tagFilter helyett
+let currentTag = "all"; // Eltároljuk az aktuális kategóriát
 const searchInput = document.getElementById("searchInput");
 const loading = document.getElementById("loading");
 const error = document.getElementById("error");
@@ -70,32 +71,61 @@ function renderRecipes() {
 
 function renderTags() {
   const tags = [...new Set(recipes.map(r => r.Tag).filter(Boolean))];
+  
+  // Megtartjuk az "Összes kategória" gombot, és hozzáadjuk a többit
+  tagMenu.innerHTML = '<button class="tag-option" onclick="selectTag(\'all\')">Összes kategória</button>';
+
   tags.forEach(tag => {
-    const option = document.createElement("option");
-    option.value = tag;
-    option.textContent = tag;
-    tagFilter.appendChild(option);
+    const btn = document.createElement("button");
+    btn.className = "tag-option";
+    btn.textContent = tag;
+    btn.onclick = () => selectTag(tag);
+    tagMenu.appendChild(btn);
   });
 }
 
+function selectTag(tag) {
+  currentTag = tag;
+  tagMenu.classList.add("hidden"); // Menü bezárása
+  
+  // Gomb kinézetének frissítése
+  if (tag === "all") {
+    filterToggle.classList.remove("active");
+    filterToggle.textContent = "☰"; // Visszaállítjuk az eredeti ikonra
+  } else {
+    filterToggle.classList.add("active");
+    filterToggle.textContent = "✓"; // Pipát teszünk bele, ha van aktív szűrő
+  }
+
+  applyFilters();
+}
+
 function showRecipeDetail(recipe) {
+  // 1. Hozzávalók feldolgozása: pöttyök nélkül, szekciófejlécek felismerése
   const ingredientsList = recipe.Ingredients
-    ? recipe.Ingredients.split("\n").map(i => `<li>${i}</li>`).join("")
+    ? recipe.Ingredients.split("\n").map(i => {
+        const trimmed = i.trim();
+        if (!trimmed) return "";
+        
+        // CSAK akkor fejléc, ha csupa nagybetűvel van írva és nem csak egy szám
+        const isHeader = trimmed === trimmed.toUpperCase() && isNaN(trimmed);
+        
+        return `<li class="${isHeader ? 'ingredient-header' : ''}">${trimmed}</li>`;
+      }).join("")
     : "";
 
-  const preparationList = recipe.Preparation
-    ? recipe.Preparation.split("\n").map(i => `<li>${i}</li>`).join("")
-    : "";
-
+  // 2. A teljes tartalom összeállítása
   modalBody.innerHTML = `
     <h2>${recipe.Food}</h2>
-    <img src="${recipe.Picture}" />
+    <img src="${recipe.Picture}" alt="${recipe.Food}" />
 
     <div class="section-title">Hozzávalók</div>
-    <ul>${ingredientsList}</ul>
+    <ul class="ingredients-list">${ingredientsList}</ul>
+
+    <hr class="section-divider">
 
     <div class="section-title">Elkészítés</div>
-    <ol>${preparationList}</ol>
+    <div class="preparation-text">${recipe.Preparation || ""}</div>
 
     <div class="bottom-actions">
       <button class="copy-button" onclick="copyRecipe()">Másolás</button>
@@ -103,7 +133,16 @@ function showRecipeDetail(recipe) {
     </div>
   `;
 
+  // 3. Megjelenítés és görgetés az elejére
   modal.classList.remove("hidden");
+  modal.scrollTop = 0; // Biztosítjuk, hogy az ablak tetején induljon a nézet
+  document.body.style.overflow = "hidden"; // Letiltjuk a háttér görgetését, amíg a modal nyitva van
+}
+
+// A bezárás függvényt is frissítsd, hogy a háttér újra görgethető legyen:
+function closeRecipeDetail() {
+  modal.classList.add("hidden");
+  document.body.style.overflow = "auto"; 
 }
 
 function copyRecipe() {
@@ -117,11 +156,10 @@ function closeRecipeDetail() {
 }
 
 function applyFilters() {
-  const tag = tagFilter.value;
   const search = searchInput.value.toLowerCase();
 
   filteredRecipes = recipes.filter(r =>
-    (tag === "all" || r.Tag === tag) &&
+    (currentTag === "all" || r.Tag === currentTag) &&
     r.Food.toLowerCase().includes(search)
   );
 
@@ -144,10 +182,15 @@ nextPage.onclick = () => {
 };
 
 searchInput.addEventListener("input", applyFilters);
-tagFilter.addEventListener("change", applyFilters);
 closeModalBtn.addEventListener("click", closeRecipeDetail);
-filterToggle.addEventListener("click", () => {
-  tagFilter.classList.toggle("hidden");
+filterToggle.addEventListener("click", (e) => {
+  e.stopPropagation(); // Megakadályozza, hogy a kattintás továbbmenjen
+  tagMenu.classList.toggle("hidden");
+});
+
+// Extra: Ha bárhova máshova kattintunk az oldalon, záródjon be a menü
+document.addEventListener("click", () => {
+  tagMenu.classList.add("hidden");
 });
 
 document.addEventListener("DOMContentLoaded", loadRecipes);

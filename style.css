@@ -25,6 +25,7 @@ body {
   font-weight: 600;
   font-size: 18px;
   border-bottom: 1px solid #eee;
+  background-color: var(--accent);
 }
 
 /* Top controls */
@@ -54,14 +55,50 @@ body {
   font-size: 16px;
 }
 
-#tagFilter {
+#tagMenu {
   position: absolute;
   top: 50px;
   right: 0;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
   background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  flex-direction: column;
+  min-width: 180px;
+  overflow: hidden;
+  display: none; /* Alapértelmezetten rejtve */
+}
+
+/* Csak akkor legyen flex, ha nincs rajta a .hidden osztály */
+#tagMenu:not(.hidden) {
+  display: flex;
+}
+
+/* Aktív szűrő gomb stílusa: sárga háttér fekete kerettel */
+.filter-button.active {
+  background-color: #F0C000;
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+
+.tag-option {
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.tag-option:last-child {
+  border-bottom: none;
+}
+
+.tag-option:hover {
+  background: #f9f9f9;
 }
 
 .container {
@@ -102,16 +139,38 @@ body {
 }
 
 /* Modal */
+/* A modal ablak kényszerített görgetéssel */
 .modal {
   position: fixed;
   inset: 0;
   background: #fff;
-  overflow-y: auto;
-  z-index: 100;
+  z-index: 1000;
+  overflow-y: scroll; /* Kényszerítjük a görgetősávot */
+  -webkit-overflow-scrolling: touch; /* Sima görgetés mobilra */
+  display: block; /* Biztosítjuk a megjelenést */
 }
 
+/* Tartalom tároló extra margóval az alján */
 .modal-content {
   padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 60px; /* Hogy a gombok alatt is maradjon hely és lehessen görgetni */
+}
+
+/* Az elkészítés szövege: megtartja a Sheet-ből jövő sortöréseket */
+.preparation-text {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Az elválasztó vonal stílusa */
+.section-divider {
+  border: 0;
+  border-top: 1px solid #eee;
+  margin: 24px 0;
 }
 
 .back-button {
@@ -172,29 +231,88 @@ body {
   display: none;
 }
 
+/* Recept gombok egységesítése */
 .bottom-actions {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   margin-top: 24px;
+  align-items: center; /* Függőlegesen középre igazítja őket, ha mégis eltérnének */
 }
 
-.copy-button {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background: #F0C000;
-  color: #000;
-  font-weight: 600;
-}
-
+/* Közös stílus mindkét gombhoz */
+.bottom-actions .copy-button, 
 .bottom-actions .back-button {
   flex: 1;
-  padding: 12px;
+  height: 50px; /* Fix magasság, hogy garantáltan egyformák legyenek */
   border-radius: 12px;
-  border: 1px solid #000;
-  background: #fff;
-  color: #000;
+  font-family: inherit;
+  font-size: 16px;
   font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0; /* Töröljük az esetleges alapértelmezett margókat */
+}
+
+/* Másolás gomb: fehér, fekete keret */
+.bottom-actions .copy-button {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #000000 !important;
+}
+
+/* Vissza gomb: sárga, fekete szöveg */
+.bottom-actions .back-button {
+  background-color: #F0C000 !important;
+  color: #000000 !important;
+  border: 2px solid #F0C000 !important; /* Itt is adunk keretet a méretazonosság miatt */
+}
+
+.ingredient-header {
+  list-style-type: none;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  margin-left: 0px;
+  text-transform: uppercase;
+}
+
+.ingredients-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.preparation-text {
+  white-space: pre-wrap; /* Megtartja a sortöréseket a Google Sheetből */
+  line-height: 1.6;
+}
+
+/* A teljes hozzávalók lista stílusa */
+.ingredients-list {
+  list-style-type: none; /* Eltávolítja a pöttyöket */
+  padding-left: 0;      /* Megszünteti a bal oldali behúzást */
+  margin-top: 10px;
+}
+
+/* Az egyes sorok közötti távolság */
+.ingredients-list li {
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+/* A nagybetűs szekciófejlécek extra formázása (opcionális) */
+.ingredient-header {
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.section-divider {
+  border: 0;
+  border-top: 1px solid #eee; /* Halvány szürke szín */
+  margin: 24px 0; /* Távolság a vonal alatt és felett */
 }
