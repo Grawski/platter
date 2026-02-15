@@ -79,17 +79,28 @@ function renderTags() {
 }
 
 function showRecipeDetail(recipe) {
-  const ingredientsList = recipe.Ingredients.split("\n").map(i => `<li>${i}</li>`).join("");
-  const preparationList = recipe.Preparation.split("\n").map(i => `<li>${i}</li>`).join("");
+  const ingredientsList = recipe.Ingredients
+    ? recipe.Ingredients.split("\n").map(i => `<li>${i}</li>`).join("")
+    : "";
+
+  const preparationList = recipe.Preparation
+    ? recipe.Preparation.split("\n").map(i => `<li>${i}</li>`).join("")
+    : "";
 
   modalBody.innerHTML = `
     <h2>${recipe.Food}</h2>
     <img src="${recipe.Picture}" />
+
     <div class="section-title">Hozzávalók</div>
     <ul>${ingredientsList}</ul>
+
     <div class="section-title">Elkészítés</div>
     <ol>${preparationList}</ol>
-    <button class="copy-button" onclick="copyRecipe()">Másolás</button>
+
+    <div class="bottom-actions">
+      <button class="copy-button" onclick="copyRecipe()">Másolás</button>
+      <button class="back-button" onclick="closeRecipeDetail()">Vissza</button>
+    </div>
   `;
 
   modal.classList.remove("hidden");

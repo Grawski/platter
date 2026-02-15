@@ -49,7 +49,8 @@ body {
   padding: 12px 14px;
   border-radius: 12px;
   border: none;
-  background: var(--accent);
+  background: #000;
+  color: #fff;
   font-size: 16px;
 }
 
@@ -118,6 +119,8 @@ body {
   border: none;
   font-size: 16px;
   margin-bottom: 16px;
+  color: #000;
+  font-weight: 600;
 }
 
 .modal img {
@@ -154,8 +157,9 @@ body {
 .pagination button {
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #000;
   background: #fff;
+  color: #000;
 }
 
 .state-message {
@@ -166,4 +170,31 @@ body {
 
 .hidden {
   display: none;
+}
+
+.bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.copy-button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #F0C000;
+  color: #000;
+  font-weight: 600;
+}
+
+.bottom-actions .back-button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
 }
