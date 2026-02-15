@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>Platter</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- PapaParse CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>Platter</h1>
+  </header>
+
+  <main class="container">
+
+    <!-- Search -->
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Keresés..." />
+    </div>
+
+    <!-- Filter -->
+    <div class="filter-bar">
+      <select id="tagFilter">
+        <option value="all">Összes kategória</option>
+      </select>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="state-message">Betöltés...</div>
+
+    <!-- Error -->
+    <div id="error" class="state-message hidden">
+      Hiba történt az adatok betöltésekor.
+    </div>
+
+    <!-- Empty -->
+    <div id="empty" class="state-message hidden">
+      Nincs találat.
+    </div>
+
+    <!-- Recipe List -->
+    <div id="recipeList" class="recipe-grid"></div>
+
+  </main>
+
+  <!-- Modal -->
+  <div id="recipeModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="back-button" id="closeModal">← Vissza</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
