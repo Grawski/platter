@@ -1,11 +1,10 @@
-// ===== CONFIG =====
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQTca2swSKK_jHvAzJxR8YyPIo_rLJBfKPEsxsje26LRxmyTIrFd-cnnPMU9gUXBF2lddbCsBp9U9Ze/pub?gid=0&single=true&output=csv";
 
-// ===== STATE =====
 let recipes = [];
 let filteredRecipes = [];
+let currentPage = 1;
+const ITEMS_PER_PAGE = 24;
 
-// ===== DOM =====
 const recipeList = document.getElementById("recipeList");
 const tagFilter = document.getElementById("tagFilter");
 const searchInput = document.getElementById("searchInput");
@@ -15,64 +14,62 @@ const empty = document.getElementById("empty");
 const modal = document.getElementById("recipeModal");
 const modalBody = document.getElementById("modalBody");
 const closeModalBtn = document.getElementById("closeModal");
+const prevPage = document.getElementById("prevPage");
+const nextPage = document.getElementById("nextPage");
+const pageInfo = document.getElementById("pageInfo");
+const filterToggle = document.getElementById("filterToggle");
 
-// ===== LOAD RECIPES =====
 async function loadRecipes() {
   try {
     const response = await fetch(SHEET_URL);
-    if (!response.ok) throw new Error("Network error");
+    const csv = await response.text();
 
-    const csvText = await response.text();
-
-    Papa.parse(csvText, {
+    Papa.parse(csv, {
       header: true,
       skipEmptyLines: true,
-      complete: function (results) {
+      complete: (results) => {
         recipes = results.data;
         filteredRecipes = recipes;
         loading.classList.add("hidden");
         renderTags();
-        renderRecipes(filteredRecipes);
-      },
-      error: function () {
-        showError();
+        renderRecipes();
       }
     });
-  } catch (err) {
-    showError();
+  } catch {
+    loading.classList.add("hidden");
+    error.classList.remove("hidden");
   }
 }
 
-// ===== RENDER RECIPES =====
-function renderRecipes(data) {
+function renderRecipes() {
   recipeList.innerHTML = "";
 
-  if (!data.length) {
+  const start = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginated = filteredRecipes.slice(start, start + ITEMS_PER_PAGE);
+
+  if (!paginated.length) {
     empty.classList.remove("hidden");
     return;
   }
 
   empty.classList.add("hidden");
 
-  data.forEach(recipe => {
+  paginated.forEach(recipe => {
     const card = document.createElement("div");
     card.className = "recipe-card";
     card.innerHTML = `
-      <img src="${recipe.Picture}" alt="${recipe.Food}" loading="lazy">
-      <div class="recipe-content">
-        <h3>${recipe.Food}</h3>
-        <div class="tag">${recipe.Tag}</div>
-      </div>
+      <img src="${recipe.Picture}" />
+      <div class="overlay">${recipe.Food}</div>
     `;
-    card.addEventListener("click", () => showRecipeDetail(recipe));
+    card.onclick = () => showRecipeDetail(recipe);
     recipeList.appendChild(card);
   });
+
+  pageInfo.textContent = `${currentPage} / ${Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE)}`;
 }
 
-// ===== RENDER TAGS =====
 function renderTags() {
   const tags = [...new Set(recipes.map(r => r.Tag).filter(Boolean))];
-
   tags.forEach(tag => {
     const option = document.createElement("option");
     option.value = tag;
@@ -81,48 +78,65 @@ function renderTags() {
   });
 }
 
-// ===== SHOW DETAIL =====
 function showRecipeDetail(recipe) {
+  const ingredientsList = recipe.Ingredients.split("\n").map(i => `<li>${i}</li>`).join("");
+  const preparationList = recipe.Preparation.split("\n").map(i => `<li>${i}</li>`).join("");
+
   modalBody.innerHTML = `
     <h2>${recipe.Food}</h2>
-    <img src="${recipe.Picture}" alt="${recipe.Food}" style="width:100%; border-radius:16px; margin:16px 0;">
-    <h3>Hozzávalók</h3>
-    <p>${recipe.Ingredients}</p>
-    <h3>Elkészítés</h3>
-    <p>${recipe.Preparation}</p>
+    <img src="${recipe.Picture}" />
+    <div class="section-title">Hozzávalók</div>
+    <ul>${ingredientsList}</ul>
+    <div class="section-title">Elkészítés</div>
+    <ol>${preparationList}</ol>
+    <button class="copy-button" onclick="copyRecipe()">Másolás</button>
   `;
+
   modal.classList.remove("hidden");
 }
 
-// ===== CLOSE DETAIL =====
+function copyRecipe() {
+  const text = modalBody.innerText;
+  navigator.clipboard.writeText(text);
+  alert("Recept kimásolva!");
+}
+
 function closeRecipeDetail() {
   modal.classList.add("hidden");
 }
 
-// ===== FILTERING =====
 function applyFilters() {
-  const selectedTag = tagFilter.value;
-  const searchValue = searchInput.value.toLowerCase();
+  const tag = tagFilter.value;
+  const search = searchInput.value.toLowerCase();
 
-  filteredRecipes = recipes.filter(recipe => {
-    const matchesTag = selectedTag === "all" || recipe.Tag === selectedTag;
-    const matchesSearch = recipe.Food.toLowerCase().includes(searchValue);
-    return matchesTag && matchesSearch;
-  });
+  filteredRecipes = recipes.filter(r =>
+    (tag === "all" || r.Tag === tag) &&
+    r.Food.toLowerCase().includes(search)
+  );
 
-  renderRecipes(filteredRecipes);
+  currentPage = 1;
+  renderRecipes();
 }
 
-// ===== ERROR =====
-function showError() {
-  loading.classList.add("hidden");
-  error.classList.remove("hidden");
-}
+prevPage.onclick = () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderRecipes();
+  }
+};
 
-// ===== EVENTS =====
-tagFilter.addEventListener("change", applyFilters);
+nextPage.onclick = () => {
+  if (currentPage < Math.ceil(filteredRecipes.length / ITEMS_PER_PAGE)) {
+    currentPage++;
+    renderRecipes();
+  }
+};
+
 searchInput.addEventListener("input", applyFilters);
+tagFilter.addEventListener("change", applyFilters);
 closeModalBtn.addEventListener("click", closeRecipeDetail);
+filterToggle.addEventListener("click", () => {
+  tagFilter.classList.toggle("hidden");
+});
 
-// ===== INIT =====
 document.addEventListener("DOMContentLoaded", loadRecipes);

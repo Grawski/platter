@@ -3,56 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#ffffff" />
   <title>Platter</title>
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- PapaParse CDN -->
+  <!-- PapaParse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
   <header class="app-header">
-    <h1>Platter</h1>
+    <div class="logo">Platter</div>
   </header>
 
-  <main class="container">
+  <div class="top-controls">
+    <input type="text" id="searchInput" placeholder="Keresés..." />
 
-    <!-- Search -->
-    <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="Keresés..." />
-    </div>
-
-    <!-- Filter -->
-    <div class="filter-bar">
-      <select id="tagFilter">
+    <div class="filter-wrapper">
+      <button id="filterToggle" class="filter-button">☰</button>
+      <select id="tagFilter" class="hidden">
         <option value="all">Összes kategória</option>
       </select>
     </div>
+  </div>
 
-    <!-- Loading -->
+  <main class="container">
     <div id="loading" class="state-message">Betöltés...</div>
+    <div id="error" class="state-message hidden">Hiba történt.</div>
+    <div id="empty" class="state-message hidden">Nincs találat.</div>
 
-    <!-- Error -->
-    <div id="error" class="state-message hidden">
-      Hiba történt az adatok betöltésekor.
-    </div>
-
-    <!-- Empty -->
-    <div id="empty" class="state-message hidden">
-      Nincs találat.
-    </div>
-
-    <!-- Recipe List -->
     <div id="recipeList" class="recipe-grid"></div>
 
+    <div class="pagination">
+      <button id="prevPage">←</button>
+      <span id="pageInfo"></span>
+      <button id="nextPage">→</button>
+    </div>
   </main>
 
-  <!-- Modal -->
   <div id="recipeModal" class="modal hidden">
     <div class="modal-content">
-      <button class="back-button" id="closeModal">← Vissza</button>
+      <button id="closeModal" class="back-button">← Vissza</button>
       <div id="modalBody"></div>
     </div>
   </div>
